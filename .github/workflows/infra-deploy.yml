@@ -15,7 +15,6 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v3
 
-      # Critical: login before Terraform so provider has credentials
       - name: Azure Login
         uses: azure/login@v1
         with:
