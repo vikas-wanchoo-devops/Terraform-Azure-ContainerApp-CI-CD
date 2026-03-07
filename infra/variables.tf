@@ -1,19 +1,24 @@
-variable "location" {
-  default = "East US"
+variable "resource_group_name" {
+  type        = string
+  default     = "WanchooResourceGroup1"
 }
 
-variable "resource_group_name" {
-  default = "WanchooResourceGroup1"
+variable "location" {
+  type        = string
+  default     = "East US"
 }
 
 variable "acr_name" {
-  default = "vikasacr1"
+  type        = string
+  default     = "vikasacr1"
 }
 
 variable "env_name" {
-  default = "vikas-env1"
+  type        = string
+  default     = "vikas-env1"
 }
 
 variable "app_name" {
-  default = "flaskapi-app1"
+  type        = string
+  default     = "flaskapi-app1"
 }
