@@ -22,6 +22,8 @@ resource "azurerm_container_app" "flaskapi" {
   resource_group_name          = azurerm_resource_group.rg.name
   container_app_environment_id = azurerm_container_app_environment.env.id
 
+  revision_mode = "Single"   # ✅ required
+
   template {
     container {
       name   = "flaskapi"
@@ -34,5 +36,15 @@ resource "azurerm_container_app" "flaskapi" {
   ingress {
     external_enabled = true
     target_port      = 5000
+
+    traffic_weight {   # ✅ required
+      latest_revision = true
+      weight          = 100
+    }
   }
+}
+
+# Optional: output the app's FQDN so you can test it easily
+output "flaskapi_url" {
+  value = azurerm_container_app.flaskapi.latest_revision_fqdn
 }
