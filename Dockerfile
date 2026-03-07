@@ -9,7 +9,6 @@ COPY requirements.txt .
 RUN pip install --no-cache-dir -r requirements.txt
 
 # Copy application source
-COPY app.py .
 COPY src/ ./src
 COPY tests/ ./tests
 
@@ -17,4 +16,4 @@ COPY tests/ ./tests
 EXPOSE 5000
 
 # Run the app with Gunicorn (production-ready)
-CMD ["gunicorn", "-b", "0.0.0.0:5000", "app:app"]
+CMD ["gunicorn", "-b", "0.0.0.0:5000", "src.app:app"]
