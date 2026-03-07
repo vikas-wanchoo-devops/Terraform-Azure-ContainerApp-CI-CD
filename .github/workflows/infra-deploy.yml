@@ -15,6 +15,7 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v3
 
+      # Critical: login before Terraform so provider has credentials
       - name: Azure Login
         uses: azure/login@v1
         with:
@@ -35,14 +36,17 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@v3
+
       - name: Setup Python
         uses: actions/setup-python@v4
         with:
           python-version: '3.10'
+
       - name: Install Dependencies
         run: |
           pip install -r app/requirements.txt
           pip install pytest
+
       - name: Run Tests
         run: pytest app/tests/
 
@@ -52,10 +56,12 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@v3
+
       - name: Azure Login
         uses: azure/login@v1
         with:
           creds: ${{ secrets.AZURE_CREDENTIALS }}
+
       - name: Deploy Container App
         run: |
           az containerapp update \
