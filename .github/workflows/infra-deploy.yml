@@ -22,18 +22,7 @@ jobs:
         run: terraform -chdir=infra init
 
       - name: Terraform Apply
-        run: terraform -chdir=infra apply -auto-approve \
-          -var="resource_group_name=${{ env.RESOURCE_GROUP_NAME }}" \
-          -var="acr_name=${{ env.ACR_NAME }}" \
-          -var="env_name=${{ env.ENV_NAME }}" \
-          -var="app_name=${{ env.APP_NAME }}" \
-          -var="location=\"${{ env.AZURE_LOCATION }}\""
-    env:
-      AZURE_LOCATION: "East US"
-      RESOURCE_GROUP_NAME: "WanchooResourceGroup1"
-      ACR_NAME: "vikasacr1"
-      ENV_NAME: "vikas-env1"
-      APP_NAME: "flaskapi-app1"
+        run: terraform -chdir=infra apply -auto-approve
 
   test:
     runs-on: ubuntu-latest
@@ -65,10 +54,6 @@ jobs:
       - name: Deploy Container App
         run: |
           az containerapp update \
-            --name ${{ env.APP_NAME }} \
-            --resource-group ${{ env.RESOURCE_GROUP_NAME }} \
-            --image ${{ env.ACR_NAME }}.azurecr.io/flask-api:latest
-    env:
-      RESOURCE_GROUP_NAME: "WanchooResourceGroup1"
-      ACR_NAME: "vikasacr1"
-      APP_NAME: "flaskapi-app1"
+            --name flaskapi-app1 \
+            --resource-group WanchooResourceGroup1 \
+            --image vikasacr1.azurecr.io/flask-api:latest
