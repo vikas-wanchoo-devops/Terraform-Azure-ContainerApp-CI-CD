@@ -28,6 +28,10 @@ resource "azurerm_container_app" "flaskapi" {
 
   revision_mode = "Single"
 
+  identity {
+    type = "SystemAssigned"
+  }
+
   template {
     container {
       name   = "flaskapi"
@@ -46,4 +50,11 @@ resource "azurerm_container_app" "flaskapi" {
       percentage      = 100
     }
   }
+}
+
+# Assign AcrPull role so Container App can pull images from ACR
+resource "azurerm_role_assignment" "acr_pull" {
+  principal_id         = azurerm_container_app.flaskapi.identity[0].principal_id
+  role_definition_name = "AcrPull"
+  scope                = azurerm_container_registry.acr.id
 }
