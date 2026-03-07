@@ -39,12 +39,13 @@ jobs:
         with:
           creds: ${{ secrets.AZURE_CREDENTIALS }}
 
+      - name: Fetch ACR Credentials
+        run: |
+          echo "ACR_USERNAME=$(az acr credential show --name vikasacr1 --query username -o tsv)" >> $GITHUB_ENV
+          echo "ACR_PASSWORD=$(az acr credential show --name vikasacr1 --query passwords[0].value -o tsv)" >> $GITHUB_ENV
+
       - name: Log in to ACR
-        uses: azure/docker-login@v1
-        with:
-          login-server: vikasacr1.azurecr.io
-          username: ${{ secrets.ACR_USERNAME }}
-          password: ${{ secrets.ACR_PASSWORD }}
+        run: echo $ACR_PASSWORD | docker login vikasacr1.azurecr.io -u $ACR_USERNAME --password-stdin
 
       - name: Build and Push Docker Image
         run: |
