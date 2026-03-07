@@ -58,6 +58,9 @@ jobs:
         with:
           creds: ${{ secrets.AZURE_CREDENTIALS }}
 
+      - name: Wait for RBAC propagation
+        run: sleep 60
+
       - name: Deploy Container App
         run: |
           az containerapp update \
