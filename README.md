@@ -1,1 +1,1 @@
-# 🐳 erraform-Azure-ContainerApp-CI-CD
+# 🐳 Terraform-Azure-ContainerApp-CI-CD
