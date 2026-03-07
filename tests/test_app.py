@@ -1,5 +1,5 @@
 import pytest
-from src.app import app   # ✅ updated import path
+from src.app import app   # works now because src is a package
 
 @pytest.fixture
 def client():
