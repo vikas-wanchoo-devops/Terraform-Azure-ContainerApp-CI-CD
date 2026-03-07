@@ -1,67 +1,76 @@
-name: Infra Deploy
+from flask import Flask, render_template_string, jsonify
 
-on:
-  push:
-    branches:
-      - develop
-  workflow_dispatch:
+app = Flask(__name__)
 
-jobs:
-  test:
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v3
-      - name: Set up Python
-        uses: actions/setup-python@v4
-        with:
-          python-version: '3.9'
-      - name: Install dependencies
-        run: pip install -r requirements.txt
-      - name: Run tests
-        run: pytest -v
+# Dark theme HTML template
+dark_template = """
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Flask API - Dark Theme</title>
+    <style>
+        body {
+            background-color: #121212;
+            color: #e0e0e0;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            margin: 0;
+            padding: 0;
+        }
+        header {
+            background-color: #1f1f1f;
+            padding: 20px;
+            text-align: center;
+            font-size: 1.8em;
+            font-weight: bold;
+            color: #00bcd4;
+        }
+        main {
+            padding: 40px;
+            text-align: center;
+        }
+        .card {
+            background-color: #1e1e1e;
+            border-radius: 8px;
+            padding: 20px;
+            display: inline-block;
+            box-shadow: 0 4px 8px rgba(0,0,0,0.5);
+        }
+        .btn {
+            background-color: #00bcd4;
+            color: #121212;
+            padding: 10px 20px;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+            font-weight: bold;
+            margin-top: 20px;
+        }
+        .btn:hover {
+            background-color: #0097a7;
+        }
+    </style>
+</head>
+<body>
+    <header>🚀 Flask API - Dark Theme</header>
+    <main>
+        <div class="card">
+            <p>Welcome to your Flask API!</p>
+            <p>This is a visually appealing dark theme demo.</p>
+            <a href="/api/hello"><button class="btn">Try API</button></a>
+        </div>
+    </main>
+</body>
+</html>
+"""
 
-  infra:
-    runs-on: ubuntu-latest
-    needs: test   # 🚀 only runs if tests pass
-    steps:
-      - name: Checkout repo
-        uses: actions/checkout@v3
+@app.route("/")
+def home():
+    return render_template_string(dark_template)
 
-      - name: Set up Terraform
-        uses: hashicorp/setup-terraform@v2
+@app.route("/api/hello")
+def hello_api():
+    return jsonify({"message": "Hello from your Flask API!"})
 
-      - name: Log in to Azure
-        uses: azure/login@v1
-        with:
-          creds: ${{ secrets.AZURE_CREDENTIALS }}
-
-      - name: Terraform Init
-        run: terraform -chdir=infra init
-
-      - name: Terraform Apply
-        run: terraform -chdir=infra apply -auto-approve
-
-  app:
-    runs-on: ubuntu-latest
-    needs: infra   # 🚀 runs only after infra job succeeds
-    steps:
-      - name: Checkout repo
-        uses: actions/checkout@v3
-
-      - name: Log in to Azure
-        uses: azure/login@v1
-        with:
-          creds: ${{ secrets.AZURE_CREDENTIALS }}
-
-      - name: Fetch ACR Credentials
-        run: |
-          echo "ACR_USERNAME=$(az acr credential show --name vikasacr1 --query username -o tsv)" >> $GITHUB_ENV
-          echo "ACR_PASSWORD=$(az acr credential show --name vikasacr1 --query passwords[0].value -o tsv)" >> $GITHUB_ENV
-
-      - name: Log in to ACR
-        run: echo $ACR_PASSWORD | docker login vikasacr1.azurecr.io -u $ACR_USERNAME --password-stdin
-
-      - name: Build and Push Docker Image
-        run: |
-          docker build -t vikasacr1.azurecr.io/flask-api:latest .
-          docker push vikasacr1.azurecr.io/flask-api:latest
+if __name__ == "__main__":
+    app.run(host="0.0.0.0", port=5000)
