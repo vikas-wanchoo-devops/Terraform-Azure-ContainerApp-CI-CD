@@ -1,10 +1,67 @@
-from flask import Flask
+name: Infra Deploy
 
-app = Flask(__name__)
+on:
+  push:
+    branches:
+      - develop
+  workflow_dispatch:
 
-@app.route("/")
-def hello():
-    return "Hello from Flask API running in Azure Container App (Terraform-managed)!"
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+      - name: Set up Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: '3.9'
+      - name: Install dependencies
+        run: pip install -r requirements.txt
+      - name: Run tests
+        run: pytest -v
 
-if __name__ == "__main__":
-    app.run(host="0.0.0.0", port=5000)
+  infra:
+    runs-on: ubuntu-latest
+    needs: test   # 🚀 only runs if tests pass
+    steps:
+      - name: Checkout repo
+        uses: actions/checkout@v3
+
+      - name: Set up Terraform
+        uses: hashicorp/setup-terraform@v2
+
+      - name: Log in to Azure
+        uses: azure/login@v1
+        with:
+          creds: ${{ secrets.AZURE_CREDENTIALS }}
+
+      - name: Terraform Init
+        run: terraform -chdir=infra init
+
+      - name: Terraform Apply
+        run: terraform -chdir=infra apply -auto-approve
+
+  app:
+    runs-on: ubuntu-latest
+    needs: infra   # 🚀 runs only after infra job succeeds
+    steps:
+      - name: Checkout repo
+        uses: actions/checkout@v3
+
+      - name: Log in to Azure
+        uses: azure/login@v1
+        with:
+          creds: ${{ secrets.AZURE_CREDENTIALS }}
+
+      - name: Fetch ACR Credentials
+        run: |
+          echo "ACR_USERNAME=$(az acr credential show --name vikasacr1 --query username -o tsv)" >> $GITHUB_ENV
+          echo "ACR_PASSWORD=$(az acr credential show --name vikasacr1 --query passwords[0].value -o tsv)" >> $GITHUB_ENV
+
+      - name: Log in to ACR
+        run: echo $ACR_PASSWORD | docker login vikasacr1.azurecr.io -u $ACR_USERNAME --password-stdin
+
+      - name: Build and Push Docker Image
+        run: |
+          docker build -t vikasacr1.azurecr.io/flask-api:latest .
+          docker push vikasacr1.azurecr.io/flask-api:latest
