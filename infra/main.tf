@@ -37,9 +37,9 @@ resource "azurerm_container_app" "flaskapi" {
     external_enabled = true
     target_port      = 5000
 
-    traffic_weight {   # ✅ required
+    traffic_weight {   # ✅ correct schema
       latest_revision = true
-      weight          = 100
+      percentage      = 100
     }
   }
 }
