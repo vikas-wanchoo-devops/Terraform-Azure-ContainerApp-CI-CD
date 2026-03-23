@@ -50,6 +50,11 @@ resource "azurerm_container_app" "flaskapi" {
       percentage      = 100
     }
   }
+
+  # Ensure the role assignment is ready before provisioning the app
+  depends_on = [
+    azurerm_role_assignment.acr_pull
+  ]
 }
 
 # Assign AcrPull role so Container App can pull images from ACR.
