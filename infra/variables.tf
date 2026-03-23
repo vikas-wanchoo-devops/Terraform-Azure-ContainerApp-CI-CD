@@ -6,20 +6,20 @@ variable "preferred_locations" {
 
 variable "resource_group_name" {
   type    = string
-  default = "WanchooResourceGroup1"
+  default = "WanchooResourceGroup"
 }
 
 variable "acr_name" {
   type    = string
-  default = "vikasacr1"
+  default = "vikasacr"
 }
 
 variable "env_name" {
   type    = string
-  default = "vikas-env1"
+  default = "vikas-env"
 }
 
 variable "app_name" {
   type    = string
-  default = "flaskapi-app1"
+  default = "flaskapi-app"
 }
