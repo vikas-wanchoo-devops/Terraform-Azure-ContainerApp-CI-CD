@@ -40,11 +40,11 @@ jobs:
 
       - name: Install Dependencies
         run: |
-          pip install -r app/requirements.txt
+          pip install -r requirements.txt
           pip install pytest
 
       - name: Run Tests
-        run: pytest app/tests/
+        run: pytest tests/
 
   deploy:
     runs-on: ubuntu-latest
@@ -58,12 +58,20 @@ jobs:
         with:
           creds: ${{ secrets.AZURE_CREDENTIALS }}
 
+      - name: Build and Push Docker Image
+        run: |
+          COMMIT_SHA=${{ github.sha }}
+          az acr login --name vikasacr1
+          docker build -t vikasacr1.azurecr.io/flask-api:${COMMIT_SHA} .
+          docker push vikasacr1.azurecr.io/flask-api:${COMMIT_SHA}
+
       - name: Wait for RBAC propagation
         run: sleep 60
 
       - name: Deploy Container App
         run: |
+          COMMIT_SHA=${{ github.sha }}
           az containerapp update \
             --name flaskapi-app1 \
             --resource-group WanchooResourceGroup1 \
-            --image vikasacr1.azurecr.io/flask-api:latest
+            --image vikasacr1.azurecr.io/flask-api:${COMMIT_SHA}
