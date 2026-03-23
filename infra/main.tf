@@ -52,7 +52,7 @@ resource "azurerm_container_app" "flaskapi" {
   }
 }
 
-# Assign AcrPull role so Container App can pull images from ACR
+# Assign AcrPull role so Container App can pull images from ACR.
 resource "azurerm_role_assignment" "acr_pull" {
   principal_id         = azurerm_container_app.flaskapi.identity[0].principal_id
   role_definition_name = "AcrPull"
