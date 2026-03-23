@@ -32,6 +32,13 @@ resource "azurerm_container_app" "flaskapi" {
     type = "SystemAssigned"
   }
 
+  # Use ACR admin credentials to avoid RBAC propagation delays
+  registry {
+    server   = azurerm_container_registry.acr.login_server
+    username = azurerm_container_registry.acr.admin_username
+    password = azurerm_container_registry.acr.admin_password
+  }
+
   template {
     container {
       name   = "flaskapi"
@@ -50,16 +57,15 @@ resource "azurerm_container_app" "flaskapi" {
       percentage      = 100
     }
   }
-
-  # Ensure the role assignment is ready before provisioning the app
-  depends_on = [
-    azurerm_role_assignment.acr_pull
-  ]
 }
 
-# Assign AcrPull role so Container App can pull images from ACR.
+# Assign AcrPull role so Container App can pull images from ACR (optional, for future RBAC-only use)
 resource "azurerm_role_assignment" "acr_pull" {
   principal_id         = azurerm_container_app.flaskapi.identity[0].principal_id
   role_definition_name = "AcrPull"
   scope                = azurerm_container_registry.acr.id
+
+  depends_on = [
+    azurerm_container_app.flaskapi
+  ]
 }
